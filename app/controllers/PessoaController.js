@@ -36,4 +36,18 @@ module.exports = {
       throw new Error(erro);
     }
   },
+
+  /* buscar perfil a partir do email */
+  async getPerfil(params) {
+    let email = Validador.validarFiltro(params.email, "email");
+    try {
+      const pessoa = await Pessoa.findOne({
+        where: { email: email, dt_exclusao: { [Op.is]: null } },
+      });
+      return { id: pessoa.id, perfil: pessoa.perfil };
+    } catch (erro) {
+      console.log(erro);
+      throw new Error(erro);
+    }
+  },
 };

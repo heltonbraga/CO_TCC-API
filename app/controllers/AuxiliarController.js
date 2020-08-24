@@ -2,8 +2,6 @@ const { Op } = require("sequelize");
 const conn = require("../database");
 const Auxiliar = require("../models/Auxiliar.js");
 const Pessoa = require("../models/Pessoa.js");
-const Procedimento = require("../models/Procedimento.js");
-const Disponibilidade = require("../models/Disponibilidade.js");
 const PessoaController = require("./PessoaController.js");
 
 const Erros = require("./Erros.js");
@@ -26,18 +24,30 @@ module.exports = {
   /* consultar todos os auxiliares, incluindo dados pessoais, excluindo dados restritos, com ordenação e paginação */
   async findAll(params) {
     let { order, offset, limit } = Validador.validarPaginacao(params, ordenacoes, orderBy);
+    let restritos = await PessoaController.isAdmin(params.admin);
     try {
-      const auxiliares = await Auxiliar.findAndCountAll({
-        order: order,
-        limit: limit,
-        offset: offset,
-        include: {
-          model: Pessoa,
-          as: "Pessoa",
-          attributes: { exclude: Pessoa.camposRestritos() },
-          where: { dt_exclusao: { [Op.is]: null } },
-        },
-      });
+      const auxiliares = restritos
+        ? await Auxiliar.findAndCountAll({
+            limit: limit,
+            offset: offset,
+            include: {
+              model: Pessoa,
+              as: "Pessoa",
+              include: [{ model: BancoPessoa, as: "DadosBancarios" }],
+              where: { dt_exclusao: { [Op.is]: null } },
+            },
+          })
+        : await Auxiliar.findAndCountAll({
+            order: order,
+            limit: limit,
+            offset: offset,
+            include: {
+              model: Pessoa,
+              as: "Pessoa",
+              attributes: { exclude: Pessoa.camposRestritos() },
+              where: { dt_exclusao: { [Op.is]: null } },
+            },
+          });
       return Validador.formatarResultado(auxiliares, params, "auxiliar");
     } catch (erro) {
       console.log(erro);

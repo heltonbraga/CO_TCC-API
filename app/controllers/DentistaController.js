@@ -28,9 +28,29 @@ const DEFAULT_LIMIT = 10;
 module.exports = {
   /* consultar todos os dentistas, incluindo dados pessoais, excluindo dados restritos, com ordenação e paginação */
   async findAll(params) {
-    let { order, offset, limit } = Validador.validarPaginacao(params);
+    let { order, offset, limit } = Validador.validarPaginacao(params, ordenacoes, orderBy);
+    let restritos = await PessoaController.isAdmin(params.admin);
     try {
-      const dentistas = await Dentista.findAndCountAll({
+      const dentistas = restritos ? await Dentista.findAndCountAll({
+        limit: limit,
+        offset: offset,
+        include: [
+          {
+            model: Disponibilidade,
+            as: "Disponibilidades",
+          },
+          {
+            model: Procedimento,
+            as: "Procedimentos",
+          },
+          {
+            model: Pessoa,
+            as: "Pessoa",
+            include: [{ model: BancoPessoa, as: "DadosBancarios" }],
+            where: { dt_exclusao: { [Op.is]: null } },
+          },
+        ],
+      }) : await Dentista.findAndCountAll({
         order: order,
         limit: limit,
         offset: offset,
@@ -157,7 +177,8 @@ module.exports = {
           {
             model: Pessoa,
             as: "Pessoa",
-            attributes: { exclude: restritos ? [] : Pessoa.camposRestritos() },
+            exclude: restritos ? null : Pessoa.camposRestritos(),
+            include: [{ model: BancoPessoa, as: "DadosBancarios" }],
           },
         ],
       });
@@ -204,7 +225,7 @@ module.exports = {
           });
           res.addDisponibilidades(disponibilidades);
         }
-        return res;
+        return { result: res, id: dentista.id };
       });
       return resultado;
     } catch (erro) {
@@ -227,6 +248,8 @@ module.exports = {
       }
       const resultado = await conn.transaction(async (t) => {
         let pessoa = await anterior.getPessoa();
+        console.log(pessoa.nr_cpf);
+        console.log(dentista.Pessoa.nr_cpf);
         Validador.merge(pessoa, dentista.Pessoa);
         if (dentista.Pessoa && dentista.Pessoa.DadosBancarios) {
           let dadosBancarios = await pessoa.getDadosBancarios();

@@ -95,6 +95,40 @@ module.exports = {
           { transaction: t }
         ),
         queryInterface.createTable(
+          "log_atendimento",
+          {
+            id: {
+              type: Sequelize.INTEGER,
+              allowNull: false,
+              primaryKey: true,
+              autoIncrement: true,
+            },
+            pessoa_id: {
+              type: Sequelize.INTEGER,
+              allowNull: false,
+              references: { model: "pessoa", key: "id" },
+            },
+            atendimento_id: {
+              type: Sequelize.INTEGER,
+              allowNull: false,
+              references: { model: "atendimento", key: "id" },
+            },
+            acao: {
+              type: Sequelize.STRING,
+              allowNull: false,
+            },
+            dt_acao: {
+              type: Sequelize.DATE,
+              allowNull: false,
+            },
+            complemento: {
+              type: Sequelize.STRING,
+              allowNull: true,
+            },
+          },
+          { transaction: t }
+        ),
+        queryInterface.createTable(
           "anamnese",
           {
             id: {
@@ -201,6 +235,7 @@ module.exports = {
         queryInterface.dropTable("prontuario", {transaction: t}),
         queryInterface.dropTable("anamnese", {transaction: t}),
         queryInterface.dropTable("atendimento", {transaction: t}),
+        queryInterface.dropTable("log_atendimento", {transaction: t}),
         queryInterface.dropTable("procedimentos_dentistas", {transaction: t}),
         queryInterface.dropTable("procedimento", {transaction: t}),
       ]);

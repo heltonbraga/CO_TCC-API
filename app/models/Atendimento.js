@@ -31,6 +31,38 @@ class Atendimento extends Model {
             ],
           },
         },
+        procedimento_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "procedimento",
+            key: "id",
+          },
+        },
+        paciente_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "paciente",
+            key: "id",
+          },
+        },
+        dentista_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "dentista",
+            key: "id",
+          },
+        },
+        anterior_id: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          references: {
+            model: "atendimento",
+            key: "id",
+          },
+        },
       },
       {
         sequelize,

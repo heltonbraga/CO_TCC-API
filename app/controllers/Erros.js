@@ -2,7 +2,7 @@ exports.erroParametrosInsuficientes = "Parâmetros insuficientes";
 exports.erroParametrosInvalidos = "Parâmetros inválidos";
 exports.erroAcessoRestrito = "Acesso restrito";
 exports.erroRequestFindAll =
-  "Requests de busca paginada devem passar 3 parâmetros no body: {'order':'nome-asc', 'page':'2', 'pagesize':'3'} ";
+  "Requests de busca paginada devem passar 3 parâmetros no body: {'order':'nome-asc', 'page':'2', 'pagesize':'3'} As ordenações possíveis nessa requisição: ";
 exports.chaveInvalida = "O id informado não consta na base de dados";
 exports.sohAdmin = "Operação autorizada apenas para administradores";
 exports.conflitoDisponibilidade = "As disponibilidades informadas apresentam conflito";

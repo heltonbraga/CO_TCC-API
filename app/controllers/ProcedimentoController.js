@@ -8,12 +8,25 @@ const PessoaController = require("./PessoaController.js");
 const Erros = require("./Erros.js");
 const Validador = require("./Validador.js");
 
-const ordenacoes = ["nome-asc", "nome-desc", "duracao-asc", "duracao-desc"];
+const ordenacoes = [
+  "nome-asc",
+  "nome-desc",
+  "duracao-asc",
+  "duracao-desc",
+  "dm_tipo-asc",
+  "dm_tipo-desc",
+  "id-asc",
+  "id-desc",
+];
 const orderBy = [
   ["nome", "ASC"],
   ["nome", "DESC"],
   ["duracao", "ASC"],
   ["duracao", "DESC"],
+  ["dm_tipo", "ASC"],
+  ["dm_tipo", "DESC"],
+  ["id", "ASC"],
+  ["id", "DESC"],
 ];
 
 const DEFAULT_ORDER = [orderBy[0]];
@@ -126,7 +139,7 @@ module.exports = {
         throw new Error(Erros.procedimentoVinculado);
       }
       const procedimento = await Procedimento.findByPk(id);
-      if(!procedimento) {
+      if (!procedimento) {
         throw new Error(Erros.chaveInvalida);
       }
       return await procedimento.destroy(id);

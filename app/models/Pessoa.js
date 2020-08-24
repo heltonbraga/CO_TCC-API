@@ -17,7 +17,7 @@ class Pessoa extends Model {
           validate: { isEmail: true, notNull: true },
         },
         nr_cpf: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.BIGINT,
           validate: {
             isCpfValido(value) {
               let str = ("00000000000" + value).slice(-11);
@@ -101,6 +101,9 @@ class Pessoa extends Model {
       "de_endereco",
       "de_endereco_comp",
     ];
+  }
+  static camposContato() {
+    return ["dt_nascimento", "nr_cpf", "nome", "email", "nr_tel"];
   }
 }
 

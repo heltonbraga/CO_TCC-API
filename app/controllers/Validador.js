@@ -11,6 +11,51 @@ module.exports = {
     };
   },
 
+  formatarVagasCalendario(registros) {
+    let calendario = [];
+    registros.map((reg) => {
+      let dia = calendario.filter((d) => d.dia === reg.dia);
+      if (dia.length === 0) {
+        dia = { dia: reg.dia, horarios: [] };
+        calendario.push(dia);
+      } else {
+        dia = dia[0];
+      }
+      dia.horarios.push({ horario: reg.inicio, dentistas: reg.dentistas.split(",") });
+    });
+    return calendario;
+  },
+
+  formatarVagas(registros, params) {
+    let vagas = [];
+    if (params.extremos) {
+      registros.map((reg) => {
+        vagas.push({
+          dentista_id: reg.dentista_id,
+          nr_cro: reg.nr_cro,
+          nome: reg.nome,
+          procedimento_id: reg.procedimento_id,
+          horario: reg.primeira,
+        });
+        vagas.push({
+          dentista_id: reg.dentista_id,
+          nr_cro: reg.nr_cro,
+          nome: reg.nome,
+          procedimento_id: reg.procedimento_id,
+          horario: reg.ultima,
+        });
+      });
+    } else {
+      vagas = registros;
+    }
+    return {
+      entidade: "vagas",
+      parametros: params,
+      quantidade: vagas.length,
+      registros: vagas,
+    };
+  },
+
   merge(ori, atu) {
     if (!ori || (Array.isArray(ori) && ori.length === 0)) {
       ori = atu;
@@ -62,7 +107,7 @@ module.exports = {
       let d1 = disponibilidades[i];
       for (let j = i + 1; j < disponibilidades.length; j++) {
         let d2 = disponibilidades[j];
-        if (temConflito(d1, d2)) {
+        if (this.temConflito(d1, d2)) {
           throw new Error(Erros.conflitoDisponibilidade);
         }
       }
@@ -108,6 +153,21 @@ module.exports = {
     return dentista;
   },
 
+  validarPaciente(params, id = false) {
+    if (!params || (id && !params.id)) {
+      throw new Error(Erros.erroParametrosInsuficientes);
+    }
+    let pessoa =
+      !id || params.pessoa ? this.validarPessoa(params.pessoa, "paciente", id) : undefined;
+    let paciente = {
+      id: params.id,
+      Pessoa: pessoa,
+      plano_tratamento: params.plano_tratamento,
+      dm_situacao: params.dm_situacao,
+    };
+    return paciente;
+  },
+
   validarPaginacao(params, ordenacoes, orderBy) {
     if (!params || !params.page || !params.pagesize || !params.order) {
       throw new Error(Erros.erroParametrosInsuficientes);
@@ -138,6 +198,22 @@ module.exports = {
     if (forma === "texto") {
       param = "%" + parametro + "%";
     }
+    if (forma === "email") {
+      if (param.indexOf("@") < 1 || param.indexOf(".") < 2)
+        throw new Error(Erros.erroParametrosInvalidos);
+    }
+    if (forma === "data") {
+      let partes = String(param).split("-");
+      if (partes.length !== 3 || partes[0].length < 4) {
+        throw new Error(Erros.erroParametrosInvalidos);
+      }
+      let a = parseInt(partes[0]);
+      let m = parseInt(partes[1]);
+      let d = parseInt(partes[2]);
+      if (isNaN(a) || isNaN(m) || isNaN(d) || a < 1900 || m > 12 || d > 31) {
+        throw new Error(Erros.erroParametrosInvalidos);
+      }
+    }
     if (forma === "hora") {
       let partes = String(param).split(":");
       partes.push("00");
@@ -163,7 +239,10 @@ module.exports = {
 
   /* */
   validarDadosBancarios(params) {
-    if (!params || !params.agencia || !params.conta) {
+    if (!params.banco && !params.agencia && !params.conta) {
+      return null;
+    }
+    if (!params.banco || !params.agencia || !params.conta) {
       throw new Error(Erros.erroParametrosInsuficientes);
     }
     let bancoPessoa = {
@@ -239,5 +318,29 @@ module.exports = {
       Pessoa: pessoa,
     };
     return auxiliar;
+  },
+
+  /* */
+  validarAtendimento(params, id = false) {
+    if (
+      !params ||
+      (!id && !params.dt_horario) ||
+      (!id && !params.dm_convenio) ||
+      (!id && !params.id_procedimento) ||
+      (!id && !params.id_paciente) ||
+      (!id && !params.id_dentista) ||
+      (id && !params.id)
+    ) {
+      throw new Error(Erros.erroParametrosInsuficientes);
+    }
+    let atendimento = {
+      dm_situacao: params.dm_situacao,
+      dt_horario: params.dt_horario,
+      dm_convenio: params.dm_convenio,
+      procedimento_id: params.id_procedimento,
+      paciente_id: params.id_paciente,
+      dentista_id: params.id_dentista,
+    };
+    return atendimento;
   },
 };

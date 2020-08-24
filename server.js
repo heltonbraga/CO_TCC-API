@@ -3,8 +3,11 @@ var cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
 
+const PessoaController = require("./app/controllers/PessoaController.js");
+
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
+const { response } = require("express");
 require("dotenv/config");
 require("./app/database");
 
@@ -31,10 +34,10 @@ const checkJwt = jwt({
   audience: process.env.AUTH_AUDIENCE,
   issuer: process.env.AUTH_ISSUER,
   algorithms: ["RS256"],
-});
+}).unless({ path: ["/usuarios/", "/bancos", "/proc"] });
 
-//app.use(checkJwt);
+app.use(checkJwt);
 require("./app/routes/routes.js")(app);
 
 app.listen(process.env.PORT || 3001);
-console.log("CO_TCC-API is up!");
+console.log("CO_TCC-API is up !");
