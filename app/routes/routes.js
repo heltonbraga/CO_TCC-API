@@ -82,7 +82,10 @@ module.exports = (app) => {
   app.patch("/auxiliares", (req, res) => tccRoute(req, res, AuxCtrl.update));
   app.delete("/auxiliares", (req, res) => tccRoute(req, res, AuxCtrl.delete));
 
-  app.get("/pacientes", (req, res) => tccRoute(req, res, PacienteCtrl.findAll));
+  app.get("/pacientes", (req, res) =>
+    tccRoute(req, res, PacienteCtrl.findAll, findAllValidator, PacienteCtrl.getOrder())
+  );
+  app.get("/pacientes/nome", (req, res) => tccRoute(req, res, PacienteCtrl.findByNome));
   app.get("/pacientes/:id", (req, res) => tccRoute(req, res, PacienteCtrl.findById));
   app.post("/pacientes", (req, res) => tccRoute(req, res, PacienteCtrl.store));
   app.patch("/pacientes", (req, res) => tccRoute(req, res, PacienteCtrl.update));

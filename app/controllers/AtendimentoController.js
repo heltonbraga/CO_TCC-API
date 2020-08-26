@@ -167,12 +167,18 @@ module.exports = {
         atendimento.anterior_id = anterior[0].id;
       }
 
-      const resultado = await Atendimento.create(atendimento);
-      LogAtendimento.create({
-        acao: "agendamento",
-        dt_acao: moment(),
-        pessoa_id: params.user,
-        atendimento_id: resultado.id,
+      const resultado = await conn.transaction(async (t) => {
+        let pac = await Paciente.findByPk(atendimento.paciente_id);
+        pac.dm_situacao = "agendado";
+        pac.save();
+        let atd = await Atendimento.create(atendimento);
+        LogAtendimento.create({
+          acao: "agendamento",
+          dt_acao: moment(),
+          pessoa_id: params.user,
+          atendimento_id: atd.id,
+        });
+        return atd;
       });
       return resultado;
     } catch (erro) {
