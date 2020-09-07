@@ -39,6 +39,7 @@ class Paciente extends Model {
   static associate(models) {
     this.belongsTo(models.Pessoa, { foreignKey: "id", as: "Pessoa" });
     this.hasMany(models.Atendimento, { foreignKey: "paciente_id", as: "Atendimentos" });
+    this.hasMany(models.Prontuario, { foreignKey: "paciente_id", as: "Prontuarios" });
     this.hasOne(models.Anamnese, { foreignKey: "paciente_id", as: "Anamnese" });
   }
 }

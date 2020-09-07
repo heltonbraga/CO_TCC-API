@@ -6,6 +6,22 @@ class Prontuario extends Model {
       {
         dt_horario: { type: DataTypes.DATE, allowNull: false },
         anotacao: DataTypes.STRING,
+        dentista_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "Dentista",
+            key: "id",
+          },
+        },
+        paciente_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "Paciente",
+            key: "id",
+          },
+        },
       },
       {
         sequelize,

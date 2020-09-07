@@ -204,10 +204,11 @@ exports.checkAtendimento =
   "    LEFT JOIN atendimento a  " +
   "      ON a.dentista_id = pd.dentista_id  " +
   "     AND DATE(a.dt_horario) = DATE(:dia)  " +
+  "     AND a.id <> :id  " +
   "    LEFT JOIN procedimento pa  " +
   "      ON pa.id = a.procedimento_id  " +
-  "   WHERE a.id IS NULL   " +
-  "      OR (a.dm_situacao <> 'cancelado'  " +
+  "   WHERE (a.id IS NULL   " +
+  "      OR a.dm_situacao = 'cancelado'  " +
   "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= TIME(DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)) " +
   "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= TIME(:dia))  " +
   "     AND NOT EXISTS ( " +
@@ -216,9 +217,11 @@ exports.checkAtendimento =
   "   INNER JOIN procedimento pb  " +
   "      ON pb.id = b.procedimento_id  " +
   "   WHERE b.paciente_id = :pac  " +
-  "	 AND DATE_ADD(b.dt_horario, INTERVAL -3 HOUR) < DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)  " +
-  "	 AND DATE_ADD(b.dt_horario, INTERVAL pb.duracao-180 MINUTE) > :dia " +
-  "	     )";
+  "     AND b.id <> :id  " +
+  "     AND b.dm_situacao <> 'cancelado' " +
+  "	    AND DATE_ADD(b.dt_horario, INTERVAL -3 HOUR) < DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)  " +
+  "	    AND DATE_ADD(b.dt_horario, INTERVAL pb.duracao-180 MINUTE) > :dia " +
+  "	        )";
 
 exports.atendimentoAnterior =
   "SELECT id " +

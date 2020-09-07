@@ -6,6 +6,14 @@ class Exame extends Model {
       {
         descricao: DataTypes.STRING,
         url: DataTypes.STRING,
+        prontuario_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "Prontuario",
+            key: "id",
+          },
+        },
       },
       {
         sequelize,

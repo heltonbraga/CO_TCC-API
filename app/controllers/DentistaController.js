@@ -305,9 +305,7 @@ module.exports = {
       if (!admin) {
         throw new Error(Erros.sohAdmin);
       }
-      const atendimentos = await AtendimentoController.findByDentista({
-        dentista: id,
-      });
+      const atendimentos = await AtendimentoController.findByDentista(params);
       if (atendimentos.total > 0) {
         throw new Error(Erros.dentistaVinculado);
       }

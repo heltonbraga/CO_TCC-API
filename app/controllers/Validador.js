@@ -257,6 +257,8 @@ module.exports = {
 
   /* */
   validarPessoa(params, perfil, id = false) {
+    console.log(id);
+    console.log(params);
     if (!params || (id && !params.id) || (!id && !params.nome) || (!id && !params.email)) {
       throw new Error(Erros.erroParametrosInsuficientes);
     }
@@ -334,6 +336,7 @@ module.exports = {
       throw new Error(Erros.erroParametrosInsuficientes);
     }
     let atendimento = {
+      id: params.id,
       dm_situacao: params.dm_situacao,
       dt_horario: params.dt_horario,
       dm_convenio: params.dm_convenio,
@@ -342,5 +345,70 @@ module.exports = {
       dentista_id: params.id_dentista,
     };
     return atendimento;
+  },
+
+  /* */
+  validarAnamnese(params, id = false) {
+    if (
+      !params ||
+      !params.dm_alergia ||
+      !params.dm_pressao ||
+      !params.dm_sangue ||
+      !params.paciente_id
+    ) {
+      throw new Error(Erros.erroParametrosInsuficientes);
+    }
+    let anamnese = {
+      id: params.id,
+      dm_alergia: params.dm_alergia,
+      de_alergia: params.de_alergia,
+      dm_pressao: params.dm_pressao,
+      dm_sangue: params.dm_sangue,
+      de_medicamento: params.de_medicamento,
+      observacao: params.observacao,
+      paciente_id: params.paciente_id,
+    };
+    return anamnese;
+  },
+
+  /* */
+  validarProntuario(params, id = false) {
+    if (!params || (id && !params.id) || (!id && !params.dt_horario)) {
+      throw new Error(Erros.erroParametrosInsuficientes);
+    }
+    let paciente = params.Paciente;
+    let dentista = params.Dentista;
+    let exames = this.validarExames(params.Exames, id);
+    let prontuario = {
+      id: params.id,
+      dt_horario: params.dt_horario,
+      anotacao: params.anotacao,
+      paciente_id: params.paciente_id,
+      dentista_id: params.dentista_id,
+      Paciente: paciente,
+      Dentista: dentista,
+      Exames: exames,
+    };
+    return prontuario;
+  },
+
+  validarExames(params, id) {
+    let exames = [];
+    if (params && params.length > 0) {
+      params.forEach((param) => exames.push(this.validarExame(param, id)));
+    }
+    return exames;
+  },
+
+  validarExame(params, id) {
+    if (!params || !params.descricao || !params.url) {
+      throw new Error(Erros.erroParametrosInsuficientes);
+    }
+    let exame = {
+      id: params.id,
+      descricao: params.descricao,
+      url: params.url,
+    };
+    return exame;
   },
 };

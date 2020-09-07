@@ -88,7 +88,7 @@ module.exports = {
   async store(params) {
     let paciente = Validador.validarPaciente(params, false);
     try {
-      paciente.dm_situacao = "sem viculo";
+      paciente.dm_situacao = "sem vinculo";
       const resultado = await conn.transaction(async (t) => {
         const pessoa = await Pessoa.create(paciente.Pessoa, { transaction: t });
         paciente.id = pessoa.id;

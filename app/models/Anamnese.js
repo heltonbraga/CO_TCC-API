@@ -7,7 +7,7 @@ class Anamnese extends Model {
         dm_alergia: {
           type: DataTypes.STRING,
           allowNull: false,
-          validate: { isIn: [["nenhuma", "antibióticos", "analgésicos", "outros"]] },
+          validate: { isIn: [["nenhuma", "antibióticos", "analgésicos", "ambos", "outros"]] },
         },
         de_alergia: {
           type: DataTypes.STRING,
@@ -30,6 +30,14 @@ class Anamnese extends Model {
         observacao: {
           type: DataTypes.STRING,
           allowNull: true,
+        },
+        paciente_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: "Paciente",
+            key: "id",
+          },
         },
       },
       {

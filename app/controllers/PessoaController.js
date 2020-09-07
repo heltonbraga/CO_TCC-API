@@ -1,9 +1,14 @@
 const { Op } = require("sequelize");
 const Pessoa = require("../models/Pessoa.js");
-const BancoPessoa = require("../models/BancoPessoa.js");
 
 const Erros = require("./Erros.js");
 const Validador = require("./Validador.js");
+
+require("dotenv/config");
+const twilioClient = require("twilio")(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTHTOKEN
+);
 
 module.exports = {
   /* verifica se o ID informado é de um administrador */
@@ -44,10 +49,30 @@ module.exports = {
       const pessoa = await Pessoa.findOne({
         where: { email: email, dt_exclusao: { [Op.is]: null } },
       });
-      return { id: pessoa.id, perfil: pessoa.perfil };
+      if (!pessoa) {
+        throw new Error(Erros.chaveInvalida);
+      }
+      return { id: pessoa.id, perfil: pessoa.perfil, email: pessoa.email };
     } catch (erro) {
       console.log(erro);
       throw new Error(erro);
     }
+  },
+
+  /* verificação de contato de usuário */
+  async verificar(params) {
+    /*let expect = params.code ? "approved" : "pending";
+    let data = params.code
+      ? await twilioClient.verify
+          .services(process.env.TWILIO_SERVICE_SID)
+          .verificationChecks.create({ to: "+55" + params.tel, code: params.code })
+      : await twilioClient.verify
+          .services(process.env.TWILIO_SERVICE_SID)
+          .verifications.create({ to: "+55" + params.tel, channel: "sms" });
+    if (!data || data.status !== expect) {
+      throw new Error(data);
+    }
+    return data;*/
+    return { success: true };
   },
 };

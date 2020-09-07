@@ -34,7 +34,7 @@ const checkJwt = jwt({
   audience: process.env.AUTH_AUDIENCE,
   issuer: process.env.AUTH_ISSUER,
   algorithms: ["RS256"],
-}).unless({ path: ["/usuarios/", "/bancos", "/proc"] });
+}).unless({ path: ["/usuarios/", "/bancos", "/proc", "/proc/livres"] });
 
 app.use(checkJwt);
 require("./app/routes/routes.js")(app);

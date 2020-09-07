@@ -5,6 +5,8 @@ const ProcCtrl = require("../controllers/ProcedimentoController.js");
 const PessoaController = require("../controllers/PessoaController.js");
 const PacienteCtrl = require("../controllers/PacienteController.js");
 const AtdCtrl = require("../controllers/AtendimentoController.js");
+const PronCtrl = require("../controllers/ProntuarioController.js");
+const AnamCtrl = require("../controllers/AnamneseController.js");
 const Erros = require("../controllers/Erros.js");
 
 module.exports = (app) => {
@@ -37,11 +39,26 @@ module.exports = (app) => {
   };
 
   app.get("/usuarios/", (req, res) => tccRoute(req, res, PessoaController.getPerfil));
+  app.get("/usuarios/verificar/", (req, res) => tccRoute(req, res, PessoaController.verificar));
 
   app.get("/atendimentos", (req, res) => tccRoute(req, res, AtdCtrl.findByFilter));
+  app.get("/atendimentos/mes", (req, res) => tccRoute(req, res, AtdCtrl.findByMes));
+  app.get("/atendimentos/:id", (req, res) => tccRoute(req, res, AtdCtrl.findById));
+  app.get("/atendimentos/log/:id", (req, res) => tccRoute(req, res, AtdCtrl.findLog));
+  app.get("/atendimentos/paciente/:id", (req, res) => tccRoute(req, res, AtdCtrl.findUltimoEProximo));
   app.post("/atendimentos", (req, res) => tccRoute(req, res, AtdCtrl.store));
   app.patch("/atendimentos/cancelar", (req, res) => tccRoute(req, res, AtdCtrl.cancelar));
   app.patch("/atendimentos/confirmar", (req, res) => tccRoute(req, res, AtdCtrl.confirmar));
+  app.patch("/atendimentos/remarcar", (req, res) => tccRoute(req, res, AtdCtrl.remarcar));
+  app.patch("/atendimentos/realizar", (req, res) => tccRoute(req, res, AtdCtrl.realizar));
+
+  app.get("/prontuarios/paciente/:id", (req, res) => tccRoute(req, res, PronCtrl.findByPaciente));
+  app.get("/prontuarios/:id", (req, res) => tccRoute(req, res, PronCtrl.findById));
+  app.post("/prontuarios", (req, res) => tccRoute(req, res, PronCtrl.store));
+  app.patch("/prontuarios", (req, res) => tccRoute(req, res, PronCtrl.update));
+
+  app.post("/anamneses", (req, res) => tccRoute(req, res, AnamCtrl.store));
+  app.patch("/anamneses", (req, res) => tccRoute(req, res, AnamCtrl.update));
 
   app.get("/vagas", (req, res) => tccRoute(req, res, AtdCtrl.findVaga));
   app.get("/vagas/calendario", (req, res) => tccRoute(req, res, AtdCtrl.findVagaCalendario));
@@ -51,6 +68,9 @@ module.exports = (app) => {
 
   app.get("/proc", (req, res) =>
     tccRoute(req, res, ProcCtrl.findAll, findAllValidator, ProcCtrl.getOrder())
+  );
+  app.get("/proc/livres", (req, res) =>
+    tccRoute(req, res, ProcCtrl.findAllLivres, findAllValidator, ProcCtrl.getOrder())
   );
 
   app.get("/procedimentos", (req, res) =>

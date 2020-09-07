@@ -5,6 +5,7 @@ exports.erroRequestFindAll =
   "Requests de busca paginada devem passar 3 parâmetros no body: {'order':'nome-asc', 'page':'2', 'pagesize':'3'} As ordenações possíveis nessa requisição: ";
 exports.chaveInvalida = "O id informado não consta na base de dados";
 exports.sohAdmin = "Operação autorizada apenas para administradores";
+exports.sohDentista = "Operação autorizada apenas para dentistas";
 exports.conflitoDisponibilidade = "As disponibilidades informadas apresentam conflito";
 exports.horariosConflitantes = "Os horários informados apresentam conflito";
 exports.procedimentoVinculado = "Não é possível excluir procedimentos vinculados a atendimentos";

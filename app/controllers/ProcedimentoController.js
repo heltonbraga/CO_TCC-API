@@ -30,7 +30,7 @@ const orderBy = [
 ];
 
 const DEFAULT_ORDER = [orderBy[0]];
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 100;
 
 module.exports = {
   /* consultar todos os procedimentos, com ordenação e paginação */
@@ -41,6 +41,23 @@ module.exports = {
         order: order,
         limit: limit,
         offset: offset,
+      });
+      return Validador.formatarResultado(procedimentos, params, "procedimento");
+    } catch (erro) {
+      console.log(erro);
+      throw new Error(erro);
+    }
+  },
+
+  /* consultar todos os procedimentos, com ordenação e paginação */
+  async findAllLivres(params) {
+    let { order, offset, limit } = Validador.validarPaginacao(params, ordenacoes, orderBy);
+    try {
+      const procedimentos = await Procedimento.findAndCountAll({
+        order: order,
+        limit: limit,
+        offset: offset,
+        where: { dm_tipo: { [Op.eq]: "livre" } },
       });
       return Validador.formatarResultado(procedimentos, params, "procedimento");
     } catch (erro) {
