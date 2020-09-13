@@ -61,7 +61,7 @@ module.exports = {
 
   /* verificação de contato de usuário */
   async verificar(params) {
-    /*let expect = params.code ? "approved" : "pending";
+    let expect = params.code ? "approved" : "pending";
     let data = params.code
       ? await twilioClient.verify
           .services(process.env.TWILIO_SERVICE_SID)
@@ -72,7 +72,7 @@ module.exports = {
     if (!data || data.status !== expect) {
       throw new Error(data);
     }
-    return data;*/
+    return data;
     return { success: true };
   },
 };
