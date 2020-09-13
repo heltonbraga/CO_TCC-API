@@ -303,9 +303,11 @@ module.exports = {
     const diasemana = dias[moment(dia).weekday()];
     const dent = params.dentista;
     const sql = params.extremos ? findVagaExt : findVaga;
+    const sqlParam = { proc: proc, dent: dent, dia: dia, diasemana: diasemana };
+    console.log(sqlParam);
     try {
       const vagas = await conn.query(sql, {
-        replacements: { proc: proc, dent: dent, dia: dia, diasemana: diasemana },
+        replacements: sqlParam,
         type: QueryTypes.SELECT,
       });
       return Validador.formatarVagas(vagas, params);
@@ -337,19 +339,20 @@ module.exports = {
     let atendimento = Validador.validarAtendimento(params, false);
     atendimento.dm_situacao = "agendado";
     try {
+      const sqlParam = {
+        proc: atendimento.procedimento_id,
+        dent: atendimento.dentista_id,
+        dia: atendimento.dt_horario,
+        diasemana: dias[moment(atendimento.dt_horario).weekday()],
+        pac: atendimento.paciente_id,
+        id: 0,
+      };
       const vaga = await conn.query(checkAtendimento, {
-        replacements: {
-          proc: atendimento.procedimento_id,
-          dent: atendimento.dentista_id,
-          dia: atendimento.dt_horario,
-          diasemana: dias[moment(atendimento.dt_horario).weekday()],
-          pac: atendimento.paciente_id,
-          id: 0,
-        },
+        replacements: sqlParam,
         type: QueryTypes.SELECT,
       });
       if (!vaga || vaga.length === 0) {
-        throw new Error(Erros.erroParametrosInvalidos);
+        throw new Error(Erros.horarioIndisponivel);
       }
       atendimento.disponibilidade_id = vaga[0].disponibilidade_id;
 

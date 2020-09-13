@@ -7,6 +7,7 @@ const PacienteCtrl = require("../controllers/PacienteController.js");
 const AtdCtrl = require("../controllers/AtendimentoController.js");
 const PronCtrl = require("../controllers/ProntuarioController.js");
 const AnamCtrl = require("../controllers/AnamneseController.js");
+const GenCtrl = require("../controllers/GenericController.js");
 const Erros = require("../controllers/Erros.js");
 
 module.exports = (app) => {
@@ -109,4 +110,6 @@ module.exports = (app) => {
   app.get("/pacientes/:id", (req, res) => tccRoute(req, res, PacienteCtrl.findById));
   app.post("/pacientes", (req, res) => tccRoute(req, res, PacienteCtrl.store));
   app.patch("/pacientes", (req, res) => tccRoute(req, res, PacienteCtrl.update));
+
+  app.get("/relatorios", (req, res) => tccRoute(req, res, GenCtrl.relatorio));
 };

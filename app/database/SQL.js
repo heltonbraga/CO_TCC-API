@@ -59,15 +59,16 @@ exports.findVagaExt =
   "   AND TIME(DATE_ADD(h.horario, INTERVAL pr.duracao MINUTE)) between d.hr_inicio and d.hr_fim " +
   "   AND h.horario > DATE_ADD(NOW(), INTERVAL -3 HOUR) " +
   "       ) macro " +
-  "  LEFT JOIN atendimento a " +
-  "    ON a.dentista_id = macro.dentista_id " +
+  " WHERE NOT EXISTS ( " +
+  "SELECT 1 " +
+  "  FROM atendimento a   " +
+  " INNER JOIN procedimento pa  " +
+  "    ON pa.id = a.procedimento_id  " +
+  " WHERE a.dentista_id = macro.dentista_id  " +
   "   AND DATE(a.dt_horario) = :dia " +
-  "  LEFT JOIN procedimento pa " +
-  "    ON pa.id = a.procedimento_id " +
-  " WHERE a.id IS NULL  " +
-  "    OR (a.dm_situacao = 'cancelado' " +
-  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= macro.fim  " +
-  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= macro.inicio) " +
+  "   AND a.dm_situacao <> 'cancelado'  " +
+  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) < macro.fim " +
+  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) > macro.inicio) " +
   " GROUP BY macro.dentista_id, macro.nr_cro, macro.nome, macro.procedimento_id";
 
 exports.findVagaCalendario =
@@ -211,7 +212,7 @@ exports.checkAtendimento =
   "      OR a.dm_situacao = 'cancelado'  " +
   "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= TIME(DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)) " +
   "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= TIME(:dia))  " +
-  "     AND NOT EXISTS ( " +
+  "      OR EXISTS ( " +
   "  SELECT 1  " +
   "    FROM atendimento b  " +
   "   INNER JOIN procedimento pb  " +
@@ -230,3 +231,80 @@ exports.atendimentoAnterior =
   "   AND a.dt_horario < :hora" +
   " ORDER BY dt_horario DESC " +
   " LIMIT 1";
+
+exports.relatHorasPorDentista =
+  "SELECT d.nr_cro, p.nome, SUM(time_to_sec(timediff(di.hr_fim, di.hr_inicio)))/60/60 AS horas_disponiveis, " +
+  "	   IFNULL( " +
+  "	   (SELECT SUM(pa.duracao)/60 " +
+  "		  FROM atendimento a " +
+  "		 INNER JOIN procedimento pa " +
+  "		    ON a.procedimento_id = pa.id " +
+  "		 WHERE a.dentista_id = d.id " +
+  "		   AND a.dm_situacao = 'realizado' " +
+  "		   AND a.dt_horario BETWEEN :inicio AND :fim), 0) AS horas_utilizadas " +
+  "  FROM pessoa p " +
+  " INNER JOIN dentista d " +
+  "    ON p.dt_exclusao IS NULL " +
+  "   AND p.id = d.id " +
+  " INNER JOIN disponibilidade di " +
+  "    ON d.id = di.dentista_id " +
+  " INNER JOIN ( " +
+  "SELECT DATE_ADD(:inicio, INTERVAL n.number DAY) AS dia,  " +
+  "	   ELT(FIELD(DAYOFWEEK(DATE_ADD(:inicio, INTERVAL n.number DAY)), 1, 2, 3, 4, 5, 6, 7),  " +
+  "	   'domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sabado') AS dm_dia_semana " +
+  "  FROM ( " +
+  "SELECT (p0.n + p1.n*2 + p2.n * POWER(2,2) + p3.n * POWER(2,3) + p4.n * POWER(2,4) + p5.n * POWER(2,5)  " +
+  "	   + p6.n * POWER(2,6) + p7.n * POWER(2,7) + p8.n * POWER(2,8)) as number " +
+  "  FROM (SELECT 0 as n UNION SELECT 1) p0, " +
+  "       (SELECT 0 as n UNION SELECT 1) p1, " +
+  "       (SELECT 0 as n UNION SELECT 1) p2, " +
+  "       (SELECT 0 as n UNION SELECT 1) p3, " +
+  "       (SELECT 0 as n UNION SELECT 1) p4, " +
+  "       (SELECT 0 as n UNION SELECT 1) p5, " +
+  "       (SELECT 0 as n UNION SELECT 1) p6, " +
+  "       (SELECT 0 as n UNION SELECT 1) p7, " +
+  "       (SELECT 0 as n UNION SELECT 1) p8 " +
+  "       ) n " +
+  " WHERE n.number < 367) per " +
+  "    ON per.dia BETWEEN :inicio AND :fim " +
+  "   AND di.dm_dia_semana = per.dm_dia_semana " +
+  "   AND per.dia BETWEEN d.dt_liberacao AND IFNULL(d.dt_bloqueio, '2999-01-01') " +
+  " GROUP BY d.nr_cro, p.nome";
+
+exports.relatAtdPorConvenio =
+  "SELECT a.dm_convenio, COUNT(1) AS qtd " +
+  "  FROM atendimento a " +
+  " WHERE a.dt_horario BETWEEN :inicio AND :fim " +
+  "   AND a.dm_situacao = 'realizado' " +
+  " GROUP BY a.dm_convenio ";
+
+exports.relatAtdPorProcedimento =
+  "SELECT p.nome, COUNT(1) AS qtd " +
+  "  FROM atendimento a " +
+  " INNER JOIN procedimento p " +
+  "    ON a.procedimento_id = p.id " +
+  "   AND a.dt_horario BETWEEN :inicio AND :fim " +
+  "   AND a.dm_situacao = 'realizado' " +
+  " GROUP BY p.nome ";
+
+exports.relatCancelamentoPorMotivo =
+  "SELECT complemento, COUNT(1) AS qtd  " +
+  "  FROM log_atendimento " +
+  " WHERE dt_acao BETWEEN :inicio AND :fim " +
+  "   AND acao = 'cancelamento' " +
+  " GROUP BY complemento ";
+
+exports.relatReagendamentoPorPerfil =
+  "SELECT p.perfil, COUNT(1) AS qtd " +
+  "  FROM log_atendimento la " +
+  " INNER JOIN pessoa p " +
+  "    ON la.pessoa_id = p.id " +
+  "   AND dt_acao BETWEEN :inicio AND :fim " +
+  "   AND acao = 'reagendamento' " +
+  " GROUP BY p.perfil ";
+
+exports.relatAtendimentoPorDia =
+  "SELECT DATE(dt_horario) AS dia, COUNT(1) AS qtd " +
+  "  FROM atendimento a " +
+  " WHERE dt_horario BETWEEN :inicio AND :fim " +
+  " GROUP BY DATE(dt_horario)";

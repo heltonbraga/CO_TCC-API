@@ -12,3 +12,4 @@ exports.procedimentoVinculado = "Não é possível excluir procedimentos vincula
 exports.dentistaVinculado = "Não é possível excluir dentistas vinculados a atendimentos";
 exports.conflitoDispAtend =
   "A disponibilidade informada apresenta conflitos com os atendimentos agendados";
+exports.horarioIndisponivel = "Esse horário de atendimento não está mais disponível";
