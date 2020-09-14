@@ -3,8 +3,6 @@ var cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
 
-const PessoaController = require("./app/controllers/PessoaController.js");
-
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
 const { response } = require("express");
@@ -17,12 +15,8 @@ app.use(cors());
 
 const router = express.Router();
 
-router.get("/", (req, res) =>
-  res.json({
-    message: "TODO",
-  })
-);
-
+router.get("/", (req, res) => res.sendFile("./index.html", {root: __dirname }));
+ 
 app.use("/", router);
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({

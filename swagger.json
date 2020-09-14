@@ -1,0 +1,2022 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Essa é a documentação da CO-TCC-API, uma api que provê serviços para o gerenciamento da clínica odontológica TCC. \n\nYou can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\n",
+    "version" : "1.0.0",
+    "title" : "CO-TCC-API",
+    "contact" : {
+      "email" : "helton.braga@gmail.com"
+    },
+    "license" : {
+      "name" : "MIT",
+      "url" : "https://github.com/heltonbraga/CO_TCC-API/blob/master/LICENSE"
+    }
+  },
+  "host" : "virtserver.swaggerhub.com",
+  "basePath" : "/heltonbraga1/CO-TCC-API/1.0.0",
+  "schemes" : [ "https", "http" ],
+  "paths" : {
+    "/usuarios/" : {
+      "get" : {
+        "tags" : [ "usuarios", "perfil" ],
+        "summary" : "Busca dados de usuário pelo email",
+        "description" : "Recebe o email do usuário e retorna o id, perfil e email.",
+        "operationId" : "getPerfil",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "email",
+          "in" : "query",
+          "description" : "email do usuário logado no sistema",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Usuario"
+              }
+            }
+          },
+          "400" : {
+            "description" : "O id informado não consta na base de dados."
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/usuarios/verificar" : {
+      "get" : {
+        "tags" : [ "usuario", "twilio" ],
+        "summary" : "Envia e confere OTP",
+        "description" : "Envia e confere token OTP via Twilio",
+        "operationId" : "verificar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "code",
+          "in" : "query",
+          "description" : "token OTP a ser verificado",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tel",
+          "in" : "query",
+          "description" : "telefone para o qual enviar o token OTP",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "enviado/conferido com sucesso"
+          },
+          "400" : {
+            "description" : "falha no envio/token inválido"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/atendimentos/" : {
+      "get" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Busca atendimentos",
+        "description" : "Busca atendimentos por data e dentista, quando o usuário solicitante for do perfil administrador o filtro de dentista é opcional.",
+        "operationId" : "findByFilter",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "usuário solicitante",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dia",
+          "in" : "query",
+          "description" : "data dos atendimentos buscados",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dentista",
+          "in" : "query",
+          "description" : "id do dentista associado aos atendimentos",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Atendimento"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Cria novo atendimento",
+        "description" : "Cria novo atendimento com os dados passados.",
+        "operationId" : "storeAtd",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "procedimento_id",
+          "in" : "query",
+          "description" : "id do procedimento a ser agendado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dentista_id",
+          "in" : "query",
+          "description" : "id do dentista a ser alocado ao atendimento",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dt_horario",
+          "in" : "query",
+          "description" : "data e hora do atendimento",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Atendimento agendado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/atendimentos/{id}" : {
+      "get" : {
+        "tags" : [ "atendimento" ],
+        "summary" : "Busca atendimento pelo id",
+        "description" : "Busca atendimento pelo id",
+        "operationId" : "findAtdById",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do atendimento",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/Atendimento"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/atendimentos/paciente/{id}" : {
+      "get" : {
+        "tags" : [ "atendimento" ],
+        "summary" : "Busca atendimentos pelo id do paciente",
+        "description" : "Busca o atendimento anterior e o próximo do paciente cujo id foi informado.",
+        "operationId" : "findUltimoEProximo",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do paciente",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Atendimento"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/atendimentos/log/{id}" : {
+      "get" : {
+        "tags" : [ "atendimento" ],
+        "summary" : "Busca registros de log do atendimento",
+        "description" : "Busca registros de log do atendimento cujo id foi informado.",
+        "operationId" : "findLog",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do atendimento",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Log"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/atendimentos/cancelar/" : {
+      "patch" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Cancelar um atendimento",
+        "description" : "Cancela o atendimento informado.",
+        "operationId" : "cancelar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do atendimento a ser cancelado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário que solicitou o cancelamento",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Atendimento cancelado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/atendimentos/confirmar/" : {
+      "patch" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Confirmar um atendimento",
+        "description" : "Confirma o atendimento informado.",
+        "operationId" : "confirmar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do atendimento a ser confirmado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário que solicitou a confirmação",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Atendimento confirmado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/atendimentos/realizar/" : {
+      "patch" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Realizar um atendimento",
+        "description" : "Atualiza um atendimento para realizado.",
+        "operationId" : "realizar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do atendimento a ser realizado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário que solicitou a realização",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Atendimento realizado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/atendimentos/remarcar/" : {
+      "patch" : {
+        "tags" : [ "atendimentos" ],
+        "summary" : "Remarcar um atendimento",
+        "description" : "Remarca o atendimento informado.",
+        "operationId" : "remarcar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do atendimento a ser remarcado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário que solicitou a remarcação",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "procedimento_id",
+          "in" : "query",
+          "description" : "id do procedimento",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dentista_id",
+          "in" : "query",
+          "description" : "id do dentista",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "paciente_id",
+          "in" : "query",
+          "description" : "id do paciente",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dt_horario",
+          "in" : "query",
+          "description" : "nova data e hora do atendimento",
+          "required" : true,
+          "type" : "string",
+          "format" : "YYYY-MM-DD HH:mm"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Atendimento remarcado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/prontuarios/paciente/{id}" : {
+      "get" : {
+        "tags" : [ "prontuarios" ],
+        "summary" : "Busca prontuarios pelo id do paciente",
+        "description" : "Busca os prontuarios do paciente cujo id foi informado.",
+        "operationId" : "findProntuarios",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do paciente",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "Id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/inline_response_200"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/prontuarios/{id}" : {
+      "get" : {
+        "tags" : [ "prontuarios" ],
+        "summary" : "Busca prontuarios pelo id",
+        "description" : "Busca o prontuario cujo id foi informado.",
+        "operationId" : "findProntuario",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do prontuario",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "Id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Prontuario"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/prontuarios/" : {
+      "post" : {
+        "tags" : [ "prontuarios" ],
+        "summary" : "Cria novo prontuario",
+        "description" : "Cria prontuario com os dados informados.",
+        "operationId" : "storeProntuario",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "dt_horario",
+          "in" : "query",
+          "description" : "data e hora de criação do prontuario",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "anotacao",
+          "in" : "query",
+          "description" : "anotacao registrada no prontuario",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "dentista_id",
+          "in" : "query",
+          "description" : "id do dentista",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "paciente_id",
+          "in" : "query",
+          "description" : "id do paciente",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "exames",
+          "in" : "query",
+          "description" : "exames referenciados no prontuario",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "prontuarios" ],
+        "summary" : "Atualiza prontuario",
+        "description" : "Atualiza prontuario com os dados informados.",
+        "operationId" : "updateProntuario",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "dt_horario",
+          "in" : "query",
+          "description" : "data e hora de atualização do prontuario",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "anotacao",
+          "in" : "query",
+          "description" : "anotacao registrada no prontuario",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "dentista_id",
+          "in" : "query",
+          "description" : "id do dentista",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "paciente_id",
+          "in" : "query",
+          "description" : "id do paciente",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "exames",
+          "in" : "query",
+          "description" : "exames referenciados no prontuario",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/anamneses/" : {
+      "post" : {
+        "tags" : [ "anamneses" ],
+        "summary" : "Cria nova anamnese",
+        "description" : "Cria anamnese com os dados informados.",
+        "operationId" : "storeanamnese",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dm_alergia",
+          "in" : "query",
+          "description" : "tipo de alergia",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "de_alergia",
+          "in" : "query",
+          "description" : "descrição de alergia",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "dm_pressao",
+          "in" : "query",
+          "description" : "tipo de pressao arterial",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dm_sangue",
+          "in" : "query",
+          "description" : "tipo sanguíneo",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "de_medicamento",
+          "in" : "query",
+          "description" : "medicamentos em uso",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "observacao",
+          "in" : "query",
+          "description" : "observacao",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "paciente_id",
+          "in" : "query",
+          "description" : "id do paciente",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "anamneses" ],
+        "summary" : "Atualiza anamnese",
+        "description" : "Atualiza anamnese com os dados informados.",
+        "operationId" : "updateanamnese",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id da anamnese a ser atualizada",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dm_alergia",
+          "in" : "query",
+          "description" : "tipo de alergia",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "de_alergia",
+          "in" : "query",
+          "description" : "descrição de alergia",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "dm_pressao",
+          "in" : "query",
+          "description" : "tipo de pressao arterial",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dm_sangue",
+          "in" : "query",
+          "description" : "tipo sanguíneo",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "de_medicamento",
+          "in" : "query",
+          "description" : "medicamentos em uso",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "observacao",
+          "in" : "query",
+          "description" : "observacao",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "paciente_id",
+          "in" : "query",
+          "description" : "id do paciente",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/vagas/" : {
+      "get" : {
+        "tags" : [ "vagas" ],
+        "summary" : "Busca vagas conforme filtro",
+        "description" : "Busca vagas para atendimento com os critérios informados",
+        "operationId" : "findVagas",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "procedimento",
+          "in" : "query",
+          "description" : "Id do procedimento",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dentista",
+          "in" : "query",
+          "description" : "Id do dentista",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "dia",
+          "in" : "query",
+          "description" : "data em que se deseja vaga para o atendimento",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/inline_response_200_1"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/vagas/calendario/" : {
+      "get" : {
+        "tags" : [ "vagas" ],
+        "summary" : "Busca vagas nos proximos 31 dias conforme filtro",
+        "description" : "Busca vagas para atendimento com os critérios informados pelos proximos 31 dias",
+        "operationId" : "findVagasCalendario",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "procedimento",
+          "in" : "query",
+          "description" : "Id do procedimento",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "dentista",
+          "in" : "query",
+          "description" : "Id do dentista",
+          "required" : false,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/inline_response_200_1"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/procedimentos/" : {
+      "get" : {
+        "tags" : [ "procedimentos" ],
+        "summary" : "Busca procedimentos",
+        "description" : "Busca todos os procedimentos.",
+        "operationId" : "allProcedimentos",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "order",
+          "in" : "query",
+          "description" : "ordenação aplicada aos resultados",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "offset aplicado na paginação dos resultados",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "quantidade de registros a retornar",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Procedimento"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "procedimentos" ],
+        "summary" : "Cria novo procedimento",
+        "description" : "Cria novo procedimento com os dados passados.",
+        "operationId" : "storeProcedimento",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nome",
+          "in" : "query",
+          "description" : "nome do procedimento",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dm_tipo",
+          "in" : "query",
+          "description" : "tipo do procedimento",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "duracao",
+          "in" : "query",
+          "description" : "duração do procedimento em minutos",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Procedimento criado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "procedimentos" ],
+        "summary" : "Deleta procedimento",
+        "description" : "Deleta um procedimento.",
+        "operationId" : "deleteProcedimento",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do procedimento a ser deletado",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Procedimento deletado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "procedimentos" ],
+        "summary" : "Atualiza procedimento",
+        "description" : "Atualiza um procedimento.",
+        "operationId" : "updateProcedimento",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do procedimento a ser atualizado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nome",
+          "in" : "query",
+          "description" : "nome do procedimento",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "dm_tipo",
+          "in" : "query",
+          "description" : "tipo do procedimento",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "duracao",
+          "in" : "query",
+          "description" : "duração do procedimento em minutos",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Procedimento atualizado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/procedimentos/{id}" : {
+      "get" : {
+        "tags" : [ "procedimento" ],
+        "summary" : "Busca procedimento pelo id",
+        "description" : "Busca procedimento pelo id",
+        "operationId" : "findProcedimentoById",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do procedimento",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/Procedimento"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/dentistas/" : {
+      "get" : {
+        "tags" : [ "dentistas" ],
+        "summary" : "Busca dentistas",
+        "description" : "Busca todos os dentistas.",
+        "operationId" : "allDentistas",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "order",
+          "in" : "query",
+          "description" : "ordenação aplicada aos resultados",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "offset aplicado na paginação dos resultados",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "quantidade de registros a retornar",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Dentista"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "dentistas" ],
+        "summary" : "Cria novo dentista",
+        "description" : "Cria novo dentista com os dados passados.",
+        "operationId" : "storeDentista",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "admin",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nr_cro",
+          "in" : "query",
+          "description" : "número do CRO do dentista",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do dentista",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "Disponibilidade",
+          "in" : "query",
+          "description" : "dados de disponibilidade do dentista",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "Procedimentos",
+          "in" : "query",
+          "description" : "procedimentos em que o dentista está habilitado",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Dentista criado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "dentistas" ],
+        "summary" : "Deleta dentista",
+        "description" : "Deleta um dentista.",
+        "operationId" : "deleteDentista",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do dentista a ser deletado",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Dentista deletado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "dentistas" ],
+        "summary" : "Atualiza dentista",
+        "description" : "Atualiza um dentista.",
+        "operationId" : "updateDentista",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do dentista a ser atualizado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "admin",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nr_cro",
+          "in" : "query",
+          "description" : "número do CRO do dentista",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do dentista",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "Disponibilidade",
+          "in" : "query",
+          "description" : "dados de disponibilidade do dentista",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "Procedimentos",
+          "in" : "query",
+          "description" : "procedimentos em que o dentista está habilitado",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Dentista atualizado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/dentistas/{id}" : {
+      "get" : {
+        "tags" : [ "dentistas" ],
+        "summary" : "Busca dentista pelo id",
+        "description" : "Busca dentista pelo id",
+        "operationId" : "findDentistaById",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do dentista",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/Dentista"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/auxiliares/" : {
+      "get" : {
+        "tags" : [ "auxiliares" ],
+        "summary" : "Busca auxiliares",
+        "description" : "Busca todos os auxiliares.",
+        "operationId" : "allAuxiliares",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "order",
+          "in" : "query",
+          "description" : "ordenação aplicada aos resultados",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "offset aplicado na paginação dos resultados",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "quantidade de registros a retornar",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Auxiliar"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "auxiliares" ],
+        "summary" : "Cria novo auxiliar",
+        "description" : "Cria novo auxiliar com os dados passados.",
+        "operationId" : "storeAuxiliar",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "admin",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nr_cro",
+          "in" : "query",
+          "description" : "número do CRO do auxiliar",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do auxiliar",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "formacao",
+          "in" : "query",
+          "description" : "tipo de formação do auxiliar",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "auxiliar criado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "auxiliares" ],
+        "summary" : "Deleta auxiliares",
+        "description" : "Deleta um auxiliar.",
+        "operationId" : "deleteauxiliares",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do auxiliar a ser deletado",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "auxiliar deletado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "auxiliares" ],
+        "summary" : "Atualiza auxiliares",
+        "description" : "Atualiza um auxiliar.",
+        "operationId" : "updateauxiliares",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do auxiliar a ser atualizado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "admin",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "nr_cro",
+          "in" : "query",
+          "description" : "número do CRO do auxiliares",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do auxiliar",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        }, {
+          "name" : "formacao",
+          "in" : "query",
+          "description" : "tipo de formação do auxiliar",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Dentista atualizado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/auxiliares/{id}" : {
+      "get" : {
+        "tags" : [ "auxiliares" ],
+        "summary" : "Busca auxiliares pelo id",
+        "description" : "Busca auxiliares pelo id",
+        "operationId" : "findAuxiliarById",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do auxiliar",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/Auxiliar"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/pacientes/" : {
+      "get" : {
+        "tags" : [ "pacientes" ],
+        "summary" : "Busca pacientes",
+        "description" : "Busca todos os pacientes.",
+        "operationId" : "allpacientes",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "order",
+          "in" : "query",
+          "description" : "ordenação aplicada aos resultados",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "offset aplicado na paginação dos resultados",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "quantidade de registros a retornar",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Paciente"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "pacientes" ],
+        "summary" : "Cria novo paciente",
+        "description" : "Cria novo paciente com os dados passados.",
+        "operationId" : "storepaciente",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "admin",
+          "in" : "query",
+          "description" : "id do usuário solicitante",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do paciente",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "paciente criado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "pacientes" ],
+        "summary" : "Atualiza pacientes",
+        "description" : "Atualiza um paciente.",
+        "operationId" : "updatepacientes",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "id do paciente a ser atualizado",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "Pessoa",
+          "in" : "query",
+          "description" : "dados pessoais do paciente",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "multi"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "paciente atualizado"
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    },
+    "/pacientes/{id}" : {
+      "get" : {
+        "tags" : [ "pacientes" ],
+        "summary" : "Busca pacientes pelo id",
+        "description" : "Busca pacientes pelo id",
+        "operationId" : "findPacienteById",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id do paciente",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "sucesso",
+            "schema" : {
+              "$ref" : "#/definitions/Paciente"
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/relatorios/" : {
+      "get" : {
+        "tags" : [ "relatorios" ],
+        "summary" : "Gera relatório",
+        "description" : "Gera relatório com indicadores de alocacao, disponibilidade, cancelamentos, reagendamentos e atendimentos.",
+        "operationId" : "relatorio",
+        "produces" : [ "application/json", "application/xml" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "query",
+          "description" : "id do usuário solicitante.",
+          "required" : true,
+          "type" : "integer"
+        }, {
+          "name" : "inicio",
+          "in" : "query",
+          "description" : "inicio do período a ser analisado para geração dos indicadores.",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "fim do período a ser analisado para geração dos indicadores.",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Parâmetros inválidos"
+          }
+        },
+        "security" : [ {
+          "co_tcc_auth" : [ "funcionario" ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "co_tcc_auth" : {
+      "type" : "oauth2",
+      "authorizationUrl" : "https://heltonbraga.auth0.com/oauth/token",
+      "flow" : "implicit",
+      "scopes" : {
+        "funcionario" : "manter paciente e atendimento",
+        "admin" : "funcionario + gerar relatório e manter cadastros de dentista, auxiliar e procedimentos",
+        "dentista" : "realizar atendimento e manter prontuário e anamnese",
+        "paciente" : "consultar e marcar próprios atendimentos."
+      }
+    },
+    "api_key" : {
+      "type" : "apiKey",
+      "name" : "token",
+      "in" : "header"
+    }
+  },
+  "definitions" : {
+    "Log" : {
+      "type" : "object",
+      "required" : [ "complemento", "horario" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "horario" : {
+          "type" : "string",
+          "format" : "YYYY-MM-DD HH:mm"
+        },
+        "usuario" : {
+          "type" : "integer"
+        },
+        "complemento" : {
+          "type" : "string"
+        }
+      },
+      "xml" : {
+        "name" : "log"
+      }
+    },
+    "Atendimento" : {
+      "type" : "object",
+      "required" : [ "dentista", "horario", "paciente", "procedimento" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "horario" : {
+          "type" : "string",
+          "format" : "YYYY-MM-DD HH:mm"
+        },
+        "dentista" : {
+          "type" : "integer"
+        },
+        "paciente" : {
+          "type" : "integer"
+        },
+        "procedimento" : {
+          "type" : "integer"
+        }
+      },
+      "xml" : {
+        "name" : "atendimento"
+      }
+    },
+    "Anamnese" : {
+      "type" : "object",
+      "required" : [ "de_alergia", "de_medicamento", "dm_alergia", "dm_pressao", "dm_sangue", "id", "observacao" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "dm_alergia" : {
+          "type" : "string"
+        },
+        "de_alergia" : {
+          "type" : "string"
+        },
+        "dm_pressao" : {
+          "type" : "string"
+        },
+        "dm_sangue" : {
+          "type" : "string"
+        },
+        "de_medicamento" : {
+          "type" : "string"
+        },
+        "observacao" : {
+          "type" : "string"
+        },
+        "Paciente" : {
+          "$ref" : "#/definitions/Paciente"
+        }
+      }
+    },
+    "Prontuario" : {
+      "type" : "object",
+      "required" : [ "anotacao", "dt_horario", "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "dt_horario" : {
+          "type" : "string"
+        },
+        "anotacao" : {
+          "type" : "string"
+        },
+        "Dentista" : {
+          "$ref" : "#/definitions/Dentista"
+        },
+        "Paciente" : {
+          "$ref" : "#/definitions/Paciente"
+        }
+      }
+    },
+    "Banco" : {
+      "type" : "object",
+      "required" : [ "codigo", "nome" ],
+      "properties" : {
+        "codigo" : {
+          "type" : "integer"
+        },
+        "nome" : {
+          "type" : "string"
+        }
+      }
+    },
+    "DadosBancarios" : {
+      "type" : "object",
+      "required" : [ "agencia", "conta", "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "agencia" : {
+          "type" : "string"
+        },
+        "conta" : {
+          "type" : "string"
+        },
+        "Banco" : {
+          "$ref" : "#/definitions/Banco"
+        }
+      }
+    },
+    "Pessoa" : {
+      "type" : "object",
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "nome" : {
+          "type" : "string"
+        },
+        "sexo" : {
+          "type" : "string"
+        },
+        "dt_nascimento" : {
+          "type" : "string"
+        },
+        "nr_cpf" : {
+          "type" : "integer"
+        },
+        "email" : {
+          "type" : "string"
+        },
+        "nr_tel" : {
+          "type" : "string"
+        },
+        "nr_tel2" : {
+          "type" : "string"
+        },
+        "nr_cep" : {
+          "type" : "integer"
+        },
+        "sg_uf" : {
+          "type" : "string"
+        },
+        "nm_cidade" : {
+          "type" : "string"
+        },
+        "de_endereco" : {
+          "type" : "string"
+        },
+        "de_endereco_comp" : {
+          "type" : "string"
+        },
+        "perfil" : {
+          "type" : "string",
+          "enum" : [ "administrador", "dentista", "auxiliar", "paciente" ]
+        },
+        "dt_exclusao" : {
+          "type" : "string"
+        },
+        "DadosBancarios" : {
+          "$ref" : "#/definitions/DadosBancarios"
+        }
+      }
+    },
+    "Dentista" : {
+      "type" : "object",
+      "required" : [ "Pessoa", "id", "nr_cro" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "nr_cro" : {
+          "type" : "integer"
+        },
+        "Pessoa" : {
+          "$ref" : "#/definitions/Pessoa"
+        }
+      }
+    },
+    "Auxiliar" : {
+      "type" : "object",
+      "required" : [ "Pessoa", "formacao", "id", "nr_cro" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "nr_cro" : {
+          "type" : "integer"
+        },
+        "formacao" : {
+          "type" : "string"
+        },
+        "Pessoa" : {
+          "$ref" : "#/definitions/Pessoa"
+        }
+      }
+    },
+    "Paciente" : {
+      "type" : "object",
+      "required" : [ "Pessoa", "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "Pessoa" : {
+          "$ref" : "#/definitions/Pessoa"
+        }
+      }
+    },
+    "Procedimento" : {
+      "type" : "object",
+      "required" : [ "id", "nome", "tipo" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "nome" : {
+          "type" : "string"
+        },
+        "tipo" : {
+          "type" : "string",
+          "enum" : [ "livre", "restrito" ]
+        }
+      }
+    },
+    "Usuario" : {
+      "type" : "object",
+      "required" : [ "email", "id", "perfil" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "perfil" : {
+          "type" : "string",
+          "example" : "administrador"
+        },
+        "email" : {
+          "type" : "string"
+        }
+      },
+      "xml" : {
+        "name" : "Usuario"
+      }
+    },
+    "inline_response_200" : {
+      "type" : "object",
+      "properties" : {
+        "Prontuario" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Prontuario"
+          }
+        },
+        "Anamnese" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Anamnese"
+          }
+        },
+        "Paciente" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Paciente"
+          }
+        }
+      }
+    },
+    "inline_response_200_1" : {
+      "type" : "object",
+      "properties" : {
+        "Horario" : {
+          "type" : "string"
+        },
+        "Dentista" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Dentista"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs" : {
+    "description" : "Find out more about Swagger",
+    "url" : "http://swagger.io"
+  }
+}
