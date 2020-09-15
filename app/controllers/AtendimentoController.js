@@ -9,6 +9,7 @@ const {
   findVaga,
   findVagaExt,
   findVagaCalendario,
+  findByProcedimento,
   checkAtendimento,
   atendimentoAnterior,
 } = require("../database/SQL.js");
@@ -28,7 +29,7 @@ module.exports = {
       let filtro2 = { dt_horario: { [Op.gte]: moment().format("YYYY-MM-DD") } };
       let filtro3 = { dm_situacao: { [Op.ne]: "cancelado" } };
       const atds = await Atendimento.findAndCountAll({
-        where: { $and: [filtro1, filtro2, filtro3] },
+        where: { [Op.and]: [filtro1, filtro2, filtro3] },
       });
       return Validador.formatarResultado(atds, params, "atendimento");
     } catch (erro) {

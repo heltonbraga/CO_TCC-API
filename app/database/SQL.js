@@ -1,3 +1,5 @@
+exports.findByProcedimento = 
+  "SELECT COUNT(1) as total";
 exports.countAtendimentosSemDisponibilidade =
   "SELECT COUNT(1) as total " +
   "FROM atendimento a " +

@@ -90,7 +90,7 @@ module.exports = {
     try {
       const procedimento = await Procedimento.findByPk(id);
       if (procedimento) {
-        const dentistas = await DentistaController.findByProcedimento({ procedimento: id });
+        const dentistas = await DentistaController.findByProcedimento({ procedimento: procedimento.nome });
         const atendimentos = await AtendimentoController.findByProcedimento({
           id: id,
           de: Date.now(),
