@@ -108,7 +108,7 @@ module.exports = {
       Validador.merge(anterior, prontuario);
       const resultado = await conn.transaction(async (t) => {
         await anterior.save({ transaction: t });
-        if (param.exames) {
+        if (params.exames) {
           //await Exame.destroy({ where: { prontuario_id: anterior.id } }, { transaction: t });
           await Exame.bulkCreate(prontuario.Exames, {
             transaction: t,

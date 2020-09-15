@@ -92,7 +92,7 @@ module.exports = {
       if (procedimento) {
         const dentistas = await DentistaController.findByProcedimento({ procedimento: id });
         const atendimentos = await AtendimentoController.findByProcedimento({
-          procedimento: id,
+          id: id,
           de: Date.now(),
         });
         return { procedimento: procedimento, oferta: dentistas.total, demanda: atendimentos.total };
@@ -150,7 +150,7 @@ module.exports = {
         throw new Error(Erros.sohAdmin);
       }
       const atendimentos = await AtendimentoController.findByProcedimento({
-        procedimento: id,
+        id: id,
       });
       if (atendimentos.total > 0) {
         throw new Error(Erros.procedimentoVinculado);
