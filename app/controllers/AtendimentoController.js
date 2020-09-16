@@ -252,7 +252,7 @@ module.exports = {
           [Op.and]: [
             { paciente_id: { [Op.eq]: id } },
             { dm_situacao: { [Op.eq]: "realizado" } },
-            { dt_horario: { [Op.lt]: moment().format("YYYY-MM-DD HH:mm:ss") } },
+            { dt_horario: { [Op.lt]: moment().add(-3, "hours").format("YYYY-MM-DD HH:mm:ss") } },
           ],
         },
         order: [["dt_horario", "DESC"]],
@@ -278,7 +278,7 @@ module.exports = {
           [Op.and]: [
             { paciente_id: { [Op.eq]: id } },
             { dm_situacao: { [Op.in]: ["agendado", "confirmado"] } },
-            { dt_horario: { [Op.gte]: moment().format("YYYY-MM-DD HH:mm:ss") } },
+            { dt_horario: { [Op.gte]: moment().add(-3, "hours").format("YYYY-MM-DD HH:mm:ss") } },
           ],
         },
         order: [["dt_horario", "ASC"]],
