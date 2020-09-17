@@ -296,6 +296,7 @@ module.exports = {
   apenas aquelas dos extremos de disponibilidade (primeira e última 
   de cada turno de cada dentista ) */
   async findVaga(params) {
+    console.log((new Date()).getTimezoneOffset());
     const proc = Validador.validarFiltro(params.procedimento, "id");
     const dia = Validador.validarFiltro(params.dia, "data");
     if (!moment(dia, "YYYY-MM-DD", true).isValid()) {
