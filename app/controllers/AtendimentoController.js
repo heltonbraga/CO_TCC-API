@@ -296,7 +296,6 @@ module.exports = {
   apenas aquelas dos extremos de disponibilidade (primeira e última 
   de cada turno de cada dentista ) */
   async findVaga(params) {
-    console.log((new Date()).getTimezoneOffset());
     const proc = Validador.validarFiltro(params.procedimento, "id");
     const dia = Validador.validarFiltro(params.dia, "data");
     if (!moment(dia, "YYYY-MM-DD", true).isValid()) {
@@ -305,7 +304,13 @@ module.exports = {
     const diasemana = dias[moment(dia).weekday()];
     const dent = params.dentista;
     const sql = params.extremos ? findVagaExt : findVaga;
-    const sqlParam = { proc: proc, dent: dent, dia: dia, diasemana: diasemana };
+    const sqlParam = {
+      proc: proc,
+      dent: dent,
+      dia: dia,
+      diasemana: diasemana,
+      tz: (0 - ((new Date()).getTimezoneOffset() / 60)),
+    };
     console.log(sqlParam);
     try {
       const vagas = await conn.query(sql, {
@@ -326,7 +331,7 @@ module.exports = {
     const dent = params.dentista;
     try {
       const vagas = await conn.query(findVagaCalendario, {
-        replacements: { proc: proc, dent: dent },
+        replacements: { proc: proc, dent: dent, tz: (0 - ((new Date()).getTimezoneOffset() / 60)), },
         type: QueryTypes.SELECT,
       });
       return Validador.formatarVagasCalendario(vagas);
@@ -351,7 +356,8 @@ module.exports = {
       };
       const vaga = await conn.query(checkAtendimento, {
         replacements: sqlParam,
-        type: QueryTypes.SELECT,
+        type: QueryTypes.SELECT, 
+        tz: (0 - ((new Date()).getTimezoneOffset() / 60)),
       });
       if (!vaga || vaga.length === 0) {
         throw new Error(Erros.horarioIndisponivel);
@@ -475,6 +481,7 @@ module.exports = {
           diasemana: dias[moment(atendimento.dt_horario).weekday()],
           pac: atendimento.paciente_id,
           id: atendimento.id,
+          tz: (0 - ((new Date()).getTimezoneOffset() / 60)),
         },
         type: QueryTypes.SELECT,
       });

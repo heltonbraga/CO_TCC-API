@@ -59,7 +59,7 @@ exports.findVagaExt =
   "       ) h " +
   "    ON TIME(h.horario) >= d.hr_inicio " +
   "   AND TIME(DATE_ADD(h.horario, INTERVAL pr.duracao MINUTE)) between d.hr_inicio and d.hr_fim " +
-  "   AND h.horario > DATE_ADD(NOW(), INTERVAL -3 HOUR) " +
+  "   AND h.horario > DATE_ADD(NOW(), INTERVAL :tz HOUR) " +
   "       ) macro " +
   " WHERE NOT EXISTS ( " +
   "SELECT 1 " +
@@ -69,8 +69,8 @@ exports.findVagaExt =
   " WHERE a.dentista_id = macro.dentista_id  " +
   "   AND DATE(a.dt_horario) = :dia " +
   "   AND a.dm_situacao <> 'cancelado'  " +
-  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) < macro.fim " +
-  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) > macro.inicio) " +
+  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL :tz HOUR)) < macro.fim " +
+  "   AND TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao+(:tz * 60) MINUTE)) > macro.inicio) " +
   " GROUP BY macro.dentista_id, macro.nr_cro, macro.nome, macro.procedimento_id";
 
 exports.findVagaCalendario =
@@ -130,8 +130,8 @@ exports.findVagaCalendario =
   "    ON pa.id = a.procedimento_id " +
   " WHERE a.id IS NULL  " +
   "    OR (a.dm_situacao = 'cancelado' " +
-  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= TIME(macro.fim) " +
-  "	   OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= macro.inicio) " +
+  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL :tz HOUR)) >= TIME(macro.fim) " +
+  "	   OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao+(:tz*60) MINUTE)) <= macro.inicio) " +
   " GROUP BY macro.dia, macro.inicio";
 
 exports.findVaga =
@@ -171,7 +171,7 @@ exports.findVaga =
   "       ) h " +
   "    ON TIME(h.horario) >= d.hr_inicio " +
   "   AND TIME(DATE_ADD(h.horario, INTERVAL pr.duracao MINUTE)) between d.hr_inicio and d.hr_fim " +
-  "   AND h.horario > DATE_ADD(NOW(), INTERVAL -3 HOUR) " +
+  "   AND h.horario > DATE_ADD(NOW(), INTERVAL :tz HOUR) " +
   "       ) macro " +
   "  LEFT JOIN atendimento a " +
   "    ON a.dentista_id = macro.dentista_id " +
@@ -180,8 +180,8 @@ exports.findVaga =
   "    ON pa.id = a.procedimento_id " +
   " WHERE a.id IS NULL  " +
   "    OR (a.dm_situacao = 'cancelado' " +
-  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= macro.fim  " +
-  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= macro.inicio) " +
+  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL :tz HOUR)) >= macro.fim  " +
+  "    OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao+(:tz*60) MINUTE)) <= macro.inicio) " +
   " ORDER BY macro.horario";
 
 exports.checkAtendimento =
@@ -203,7 +203,7 @@ exports.checkAtendimento =
   "      ON pr.id = pd.procedimento_id  " +
   "     AND TIME(:dia) >= d.hr_inicio  " +
   "     AND TIME(DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)) between d.hr_inicio and d.hr_fim  " +
-  "     AND :dia > DATE_ADD(NOW(), INTERVAL -3 HOUR)  " +
+  "     AND :dia > DATE_ADD(NOW(), INTERVAL :tz HOUR)  " +
   "    LEFT JOIN atendimento a  " +
   "      ON a.dentista_id = pd.dentista_id  " +
   "     AND DATE(a.dt_horario) = DATE(:dia)  " +
@@ -212,8 +212,8 @@ exports.checkAtendimento =
   "      ON pa.id = a.procedimento_id  " +
   "   WHERE (a.id IS NULL   " +
   "      OR a.dm_situacao = 'cancelado'  " +
-  "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL -3 HOUR)) >= TIME(DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)) " +
-  "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao-180 MINUTE)) <= TIME(:dia))  " +
+  "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL :tz HOUR)) >= TIME(DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)) " +
+  "      OR TIME(DATE_ADD(a.dt_horario, INTERVAL pa.duracao+(:tz*60) MINUTE)) <= TIME(:dia))  " +
   "      OR EXISTS ( " +
   "  SELECT 1  " +
   "    FROM atendimento b  " +
@@ -222,8 +222,8 @@ exports.checkAtendimento =
   "   WHERE b.paciente_id = :pac  " +
   "     AND b.id <> :id  " +
   "     AND b.dm_situacao <> 'cancelado' " +
-  "	    AND DATE_ADD(b.dt_horario, INTERVAL -3 HOUR) < DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)  " +
-  "	    AND DATE_ADD(b.dt_horario, INTERVAL pb.duracao-180 MINUTE) > :dia " +
+  "	    AND DATE_ADD(b.dt_horario, INTERVAL :tz HOUR) < DATE_ADD(:dia, INTERVAL pr.duracao MINUTE)  " +
+  "	    AND DATE_ADD(b.dt_horario, INTERVAL pb.duracao+(:tz*60) MINUTE) > :dia " +
   "	        )";
 
 exports.atendimentoAnterior =
