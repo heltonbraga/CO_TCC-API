@@ -353,6 +353,7 @@ module.exports = {
         diasemana: dias[moment(atendimento.dt_horario).weekday()],
         pac: atendimento.paciente_id,
         id: 0,
+        tz: (0 - ((new Date()).getTimezoneOffset() / 60)),
       };
       const vaga = await conn.query(checkAtendimento, {
         replacements: sqlParam,
